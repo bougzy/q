@@ -155,6 +155,22 @@ app.post('/api/reset-password', async (req, res) => {
     }
 });
 
+
+app.get('/api/check-authentication', async (req, res) => {
+    try {
+        // Check if the user is authenticated
+        if (req.session.userId) {
+            res.json({ isAuthenticated: true });
+        } else {
+            res.json({ isAuthenticated: false });
+        }
+    } catch (error) {
+        console.error('Error checking authentication:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+
 app.post('/api/deposit', requireAuth, async (req, res) => {
     const { amount } = req.body;
     try {
