@@ -1,9 +1,12 @@
+
+
 const express = require('express');
 const mongoose = require('mongoose');
 const rateLimit = require('express-rate-limit');
 const session = require('express-session');
 const helmet = require('helmet');
 const bcrypt = require('bcryptjs'); // Updated import statement
+
 const crypto = require('crypto');
 const path = require('path');
 
@@ -40,6 +43,9 @@ const User = mongoose.model('User', userSchema);
 app.use(express.json());
 app.use(helmet());
 
+
+
+
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100,
@@ -59,24 +65,6 @@ app.use(
         }
     })
 );
-
-const requireAuth = async (req, res, next) => {
-    if (!req.session.userId) {
-        return res.status(401).json({ error: 'Unauthorized' });
-    }
-    try {
-        const user = await User.findById(req.session.userId);
-        if (!user) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-        // Additional authorization logic here if needed
-        // For example, checking user roles or permissions
-        next();
-    } catch (error) {
-        console.error('Error during authentication:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-};
 
 app.post('/api/register', async (req, res) => {
     const { username, email, password } = req.body;
@@ -155,6 +143,17 @@ app.post('/api/reset-password', async (req, res) => {
     }
 });
 
+const requireAuth = (req, res, next) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    next();
+};
+
+app.get('/api/protected', requireAuth, (req, res) => {
+    res.json({ message: 'Protected route accessed successfully' });
+});
+
 app.post('/api/deposit', requireAuth, async (req, res) => {
     const { amount } = req.body;
     try {
@@ -169,8 +168,7 @@ app.post('/api/deposit', requireAuth, async (req, res) => {
             const profitBalance = latestDeposit.profitBalance + profitEarned;
             res.status(201).json({ message: 'Deposit saved successfully', amount: latestDeposit.amount, profitBalance });
         } else {
-            res.status(201).json({ message: 'Deposit saved successfully', amount:
-            0, profitBalance: 0 });
+            res.status(201).json({ message: 'Deposit saved successfully', amount: 0, profitBalance: 0 });
         }
     } catch (error) {
         console.error('Error during deposit:', error);
