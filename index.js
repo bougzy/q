@@ -170,7 +170,6 @@ app.get('/api/check-authentication', async (req, res) => {
     }
 });
 
-
 app.post('/api/deposit', requireAuth, async (req, res) => {
     const { amount } = req.body;
     try {
@@ -185,14 +184,14 @@ app.post('/api/deposit', requireAuth, async (req, res) => {
             const profitBalance = latestDeposit.profitBalance + profitEarned;
             res.status(201).json({ message: 'Deposit saved successfully', amount: latestDeposit.amount, profitBalance });
         } else {
-            res.status(201).json({ message: 'Deposit saved successfully', amount:
-            0, profitBalance: 0 });
+            res.status(201).json({ message: 'Deposit saved successfully', amount: 0, profitBalance: 0 });
         }
     } catch (error) {
         console.error('Error during deposit:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
 
 app.get('/api/deposit', requireAuth, async (req, res) => {
     try {
